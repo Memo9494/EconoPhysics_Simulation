@@ -13,7 +13,7 @@ def interaccion(personas,n_personas):
     global gobierno
     l = randint(0,n_personas-1)
     r = randint(0,n_personas-1)
-    pond = 4
+    pond = 2
     iva = pond/4
     pond = pond - iva
     gobierno += iva
@@ -60,7 +60,6 @@ def cuenta_clases(personas,clases,n_clases):
     return clases
 def grafica(personas,bins):
     plt.hist(personas,5)
-    plt.show()
 def entropia(N,Clases,C):
     S = N*np.log(np.exp(N))
     sum = 0
@@ -83,21 +82,21 @@ def redestribucion(personas,n_personas):
         gobierno -= redis
 def bienestara(clases,n_claes,M):
     bienestar = 0
-    a = 1
-    o1 = M*a
+    a = 5
     for i in clases:
-        bienestar += i[0]*o1*i[3]
+        bienestar += i[0]*a*i[3]
     return bienestar
 def bienestarb(clases,n_claes,M):
     bienestar = 0
-    a = 1
-    o1 = 1 - np.exp(-a*M)
+    MC = 1000
+    a = 1/MC
     for i in clases:
-        bienestar += i[0]*o1*i[3]
+        bienestar += i[0]*(1 - np.exp(-a*i[3]))
     return bienestar
 def main():
     #Declarar Variables
-    M = 8000
+    M = 4000
+    
     personas = []
     n_personas = 1000
     n_clases = 5
@@ -105,7 +104,7 @@ def main():
     rango = int((M/n_personas))
     interacciones = 10000
     personas = delta(personas,M,n_personas)
-
+    promedio = M/n_personas
     #Crear las clases
     clases = []
     clases = crear_clases(clases,rango,n_clases)
@@ -115,17 +114,14 @@ def main():
     #Interacciones
     for i in range(interacciones):
         personas = interaccion(personas,n_personas)
-        tiempo.append(i+1)
+        tiempo.append(int(i+1))
+        personas.sort()
+        clases = cuenta_clases(personas,clases,n_clases)
         if i%(interacciones/4) == 0:
-            personas.sort()
-            clases = cuenta_clases(personas,clases,n_clases)
+            
             print_clases(clases,M,n_personas)
-            print(bienestara(clases,n_clases,M))
-            print(bienestarb(clases,n_clases,M))
-        dista.append(bienestara)
-        distb.append(bienestarb)
-        
-    
+        dista.append(bienestara(clases,n_clases,M))
+        distb.append(bienestarb(clases,n_clases,M))
     personas.sort()
     #Redistribuir el IVA
     print(gobierno)
@@ -134,9 +130,19 @@ def main():
     #Contar las personas
     clases = cuenta_clases(personas,clases,n_clases)
     #imprimir
-    grafica(personas,n_clases)
-    plt.plot(tiempo,dista)
+    #]\grafica(personas,n_clases)
     plt.plot(tiempo,distb)
+    #grafica(personas,n_clases)
+    #smn = [clases[0][3],clases[1][3],clases[2][3],clases[3][3],clases[4][3]]
+    a = 0.001
+    #smn2 = [1-(np.exp(-a*clases[0][3])),1-(np.exp(-a*clases[1][3])),1-(np.exp(-a*clases[2][3])),1-(np.exp(-a*clases[3][3])),1-(np.exp(-a*clases[4][3]))]
+    prob = []
+
+    for i in clases:
+        prob.append(i[0]/n_personas)
+    valor_esperado = 0
+    for i in range(n_clases):
+        valor_esperado += clases[i][3]*prob[i]
     plt.show()
 
 if __name__ == "__main__":
